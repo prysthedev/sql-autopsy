@@ -39,3 +39,9 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[project.urls]
+Homepage = "https://github.com/prysthedev/sql-autopsy"
+Repository = "https://github.com/prysthedev/sql-autopsy.git"
+Issues = "https://github.com/prysthedev/sql-autopsy/issues"
+Changelog = "https://github.com/prysthedev/sql-autopsy/releases"
