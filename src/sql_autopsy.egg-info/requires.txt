@@ -1,0 +1,11 @@
+sqlglot
+networkx
+SQLAlchemy
+duckdb
+duckdb-engine
+rich
+typer
+
+[dev]
+pytest
+pytest-mock

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sql-autopsy"
+version = "0.1.2"
+description = "A runtime logical debugger for SQL"
+readme = "README.md"
+authors = [
+    { name="Data Engineer", email="engineer@example.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "sqlglot",
+    "networkx",
+    "SQLAlchemy",
+    "duckdb",
+    "duckdb-engine",
+    "rich",
+    "typer"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-mock"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+autopsy = "sql_autopsy.cli:app"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

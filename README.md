@@ -1,0 +1,90 @@
+# sql-autopsy
+
+**A runtime logical debugger for SQL.** 
+
+Have you ever run a massive, 1,000-line SQL query with dozens of CTEs (Common Table Expressions) and `JOIN`s, only to realize that somewhere in the middle, all of your data vanished? Or worse, a bad join caused your row count to explode?
+
+Finding the exact line of code that broke your dataset usually means manually commenting out blocks of SQL and running `SELECT COUNT(*)` repeatedly. 
+
+**`sql-autopsy` automates this process.** It takes your failing SQL query, dissects it, caches each step locally, and pinpoints exactly which line of code broke your logic.
+
+---
+
+## How It Works
+
+1. **Disassembles your SQL:** Parses your script and maps the execution order of all your CTEs.
+2. **Avoids the Materialization Trap:** Rewrites your query on the fly to cache intermediate results into temporary tables (using DuckDB by default), so your database doesn't re-calculate the entire query from scratch for every check.
+3. **Probes the Data:** Runs lightweight probes to check row counts and `NULL` values at every step.
+4. **Diagnoses the Flaw:** Pinpoints the exact cause of your data anomaly.
+
+### What it catches:
+* **Fatal Drops (Black Holes):** A `WHERE` clause that accidentally filters out 100% of the rows.
+* **Cartesian Explosions (Fan-Outs):** A bad `JOIN` that accidentally multiplies your row counts.
+* **Join Key Mismatches (Null-Outs):** A `LEFT JOIN` where the join keys don't match, resulting in 100% `NULL` columns.
+
+---
+
+## Installation
+
+You can install `sql-autopsy` easily via pip. Requires Python 3.9+.
+
+```bash
+pip install sql-autopsy
+```
+
+---
+
+## Usage
+
+Running `sql-autopsy` is as simple as pointing it at your broken SQL file.
+
+```bash
+autopsy broken_script.sql
+```
+
+By default, the autopsy runs locally using **DuckDB** in-memory (perfect for fast testing on mock data). You can also target a live database by passing a connection string:
+
+```bash
+autopsy broken_script.sql --target postgres://user:pass@localhost/db
+```
+
+---
+
+## Example
+
+Imagine you have a script named `broken_script.sql` that joins users to orders and then filters them. Somewhere in the code, the rows disappear. 
+
+Simply run:
+```bash
+autopsy broken_script.sql
+```
+
+**Output:**
+
+```text
+        Execution Summary         
++--------------------------------+
+| Order | CTE Name   | Row Count |
+|-------+------------+-----------|
+| 1     | first_cte  |         3 |
+| 2     | second_cte |         2 |
+| 3     | third_cte  |         3 |
+| 4     | fourth_cte |         0 |
++--------------------------------+
+
+Autopsy completed with 1 fatal flaw(s) found:
+
+Fatal Drop in fourth_cte
+WHERE clause removed 100% of incoming rows from 'third_cte' (3 -> 0).
++--------------------------- Offending SQL Snippet ---------------------------+
+|   1 SELECT * FROM third_cte WHERE name = 'Charlie'                          |
++-----------------------------------------------------------------------------+
+```
+
+Instead of wasting hours digging through SQL, `sql-autopsy` immediately tells you that `fourth_cte` removed all incoming rows because nobody is named "Charlie".
+
+---
+
+## Contributing
+`sql-autopsy` is open-source and looking for contributors!
+We rely heavily on `sqlglot` for parsing, `networkx` for DAG routing, and `SQLAlchemy` for query execution. Pull requests for new dialects (Snowflake, BigQuery) and new diagnostic rules are highly welcome.
