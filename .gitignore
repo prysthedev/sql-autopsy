@@ -1,3 +1,4 @@
 test.sql
 dist/
 venv
+src/sql_autopsy/__pycache__
