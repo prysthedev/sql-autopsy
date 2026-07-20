@@ -7,6 +7,7 @@ name = "sql-autopsy"
 version = "0.1.4"
 description = "A runtime logical debugger for SQL"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name="Prys", email="contact@reddyw.space" }
 ]
